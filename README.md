@@ -170,13 +170,3 @@ venv/
 .env
 .DS_Store
 ````
-
-#
-```bash
-git pull
-# README.md را با متن بالا جایگزین کن
-# .gitignore را ایجاد کن
-
-git add README.md .gitignore
-git commit -m "Clean README, prevent book leaks, add gitignore"
-git push
