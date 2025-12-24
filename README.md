@@ -1,28 +1,19 @@
 # Mein Computer lernt Fahrrad fahren
-**Ein Mitmach-Buch von Finn** :contentReference[oaicite:1]{index=1}
+**Ein Mitmach-Buch von Finn**
 
-Dieses Repository begleitet das Kinder-Mitmachbuch **„Mein Computer lernt Fahrrad fahren“**.
-Kinder lernen Schritt für Schritt auf einem **Raspberry Pi (Modell 4 oder 5)**, wie ein kleines Programm Bilder in **„BICYCLE“** und **„NOT BICYCLE“** einteilt – spielerisch, kindgerecht und praktisch. :contentReference[oaicite:2]{index=2}
+Dieses Repository enthält **Code & Projektstruktur** zum Buchprojekt rund um Raspberry Pi
+(Bilderkennung: „BICYCLE“ vs. „NOT BICYCLE“).
 
-> Wichtig: Alle technischen Befehle und Code-Beispiele sind absichtlich **in ENGLISCH**, damit sie exakt so funktionieren, wie der Computer sie erwartet. :contentReference[oaicite:3]{index=3}
+✅ **Wichtig:** Das **vollständige Manuskript / Buch-PDF ist NICHT in diesem Repository enthalten**, damit keine Inhalte unbeabsichtigt öffentlich werden.
 
----
-
-## Inhalt des Buchs (Kapitelübersicht)
-- Hinweis für Erwachsene
-- Regeln für dieses Mitmach-Buch
-- Kapitel 1–11: Vom Terminal bis zum fertigen Modell
-- Anhang A: Mini-Spickzettel (Befehle)
-- Anhang B: Häufige Probleme & ruhige Lösungen
-- Danksagung :contentReference[oaicite:4]{index=4}
+> Hinweis: Alle technischen Befehle und Code-Beispiele sind absichtlich **in ENGLISCH**, damit sie exakt so funktionieren, wie der Computer sie erwartet.
 
 ---
 
-## Was du hier findest
-- 📘 **Manuskript (PDF)** (falls du es in `manuscript/` ablegst)
-- 🧠 **Python-Code** zum Trainieren eines kleinen Bildklassifikations-Modells (Pi-friendly)
-- 🗂️ **Projektstruktur** (Ordner für Trainings- und Testbilder)
-- 🧩 Platz für **Cover/Illustrationen/Screenshots** (in `assets/`)
+## Was ist in diesem Repo?
+- 🧠 Python-Code (Training & Test)
+- 🗂️ Ordnerstruktur für Trainings- und Testbilder
+- 🖼️ Optionale Assets (Screenshots/Illustrationen), **ohne Buchtext**
 
 ---
 
@@ -36,6 +27,7 @@ Kinder lernen Schritt für Schritt auf einem **Raspberry Pi (Modell 4 oder 5)**,
 ---
 
 ## Quick Start (Kurz-Anleitung)
+
 ### 1) System aktualisieren
 ```bash
 sudo apt update && sudo apt full-upgrade -y
@@ -56,7 +48,7 @@ python3 -m venv meine_umgebung
 source meine_umgebung/bin/activate
 ```
 
-### 4) Benötigte Bibliotheken
+### 4) Bibliotheken
 
 ```bash
 pip install tensorflow pillow numpy
@@ -68,7 +60,7 @@ pip install tensorflow pillow numpy
 mkdir -p daten/train/bicycle daten/train/not_bicycle daten/test/bicycle daten/test/not_bicycle
 ```
 
-Lege danach Bilder ab wie z.B.: 
+Beispiel-Dateien:
 
 * `daten/train/bicycle/bike_01.jpg`
 * `daten/train/not_bicycle/chair_01.jpg`
@@ -77,46 +69,40 @@ Lege danach Bilder ab wie z.B.:
 
 ---
 
-## Trainieren (fahrrad_lernen.py)
+## Training
 
-Erstelle im Projektordner eine Datei **`fahrrad_lernen.py`** und nutze den Code aus dem Buch. 
-
-Dann Training starten:
+Lege deinen Trainings-Code z.B. in `code/fahrrad_lernen.py` ab und starte:
 
 ```bash
-python3 fahrrad_lernen.py
+python3 code/fahrrad_lernen.py
 ```
 
-Am Ende wird das Modell gespeichert als:
-
-* `mein_fahrrad_modell.h5` 
+Das Modell kann z.B. als `mein_fahrrad_modell.h5` gespeichert werden.
 
 ---
 
-## Testen (testen.py)
+## Test
 
-Erstelle **`testen.py`** (siehe Buch) und setze `img_path` auf ein echtes Testbild. 
-
-Dann:
+Lege z.B. `code/testen.py` an und starte:
 
 ```bash
-python3 testen.py
+python3 code/testen.py
 ```
 
----Amir Mobasheraghdam
+---
 
-## Repository-Struktur (Empfehlung)
+## Empfohlene Repo-Struktur
 
-```
+```text
 .
-├─ manuscript/
-│  └─ Mein_Computer_lernt_Fahrrad_fahren_Manuskript_Voll.pdf
 ├─ code/
 │  ├─ fahrrad_lernen.py
 │  └─ testen.py
+├─ daten/                 # optional (lokal), Bilder nicht öffentlich committen!
 ├─ assets/
-│  ├─ images/        # Cover/Illustrationen
-│  └─ screenshots/   # Raspberry-Pi Screenshots
+│  ├─ images/
+│  └─ screenshots/
+├─ .gitignore
 └─ README.md
 ```
 
@@ -124,36 +110,16 @@ python3 testen.py
 
 ## Credits
 
-* **Autor:** Amir Mobasher
+* **Autor:** AmirMobasheraghdam
 * **Technische Übersetzung & fachliche Bearbeitung:** Ladan Seddighi
-* **(Optional) Technische Prüfung (IT):** [Name eintragen]
+* **Technische Prüfung (IT) (optional):** [Name eintragen]
 
 ---
 
-## Lizenz / Copyright (WICHTIG)
+## Copyright / Lizenz
 
-Bitte wähle bewusst, was auf GitHub öffentlich sein soll.
-
-### Option A (empfohlen für Bücher):
-
-* **Manuskript/Book-Text:** © [Jahr] Amir Mobasher – **Alle Rechte vorbehalten**
-* **Code (optional):** MIT License (frei nutzbar)
-
-### Option B:
-
-* Alles unter einer Creative-Commons-Lizenz (nur wenn du das wirklich willst)
-
-> Trage hier deine Entscheidung ein:
-
-* Manuskript-Lizenz: **[All rights reserved / ...]**
-* Code-Lizenz: **[MIT / ...]**
-
----
-
-## Kontakt
-
-* E-Mail: [deine E-Mail]
-* Website (optional): [Link]
+* **Buchtext/Manuskript:** © 2025 AmirMobasheraghdam — Alle Rechte vorbehalten (nicht in diesem Repo)
+* **Code:** (optional) MIT License
 
 ---
 
@@ -161,3 +127,56 @@ Bitte wähle bewusst, was auf GitHub öffentlich sein soll.
 
 Dieses Repository ist für Lern- und Bildungszwecke gedacht.
 Bilder, Logos und Marken gehören ihren jeweiligen Inhabern.
+
+````
+
+
+```gitignore
+# Book / manuscript (never publish)
+manuscript/
+*.pdf
+*.docx
+*.odt
+*.epub
+*.mobi
+*.indd
+
+# Exports / prints
+export/
+exports/
+print/
+build/
+dist/
+
+# Datasets / images (usually large or copyrighted)
+daten/
+data/
+dataset/
+datasets/
+*.zip
+*.7z
+*.rar
+
+# Model files
+*.h5
+*.keras
+*.tflite
+
+# Python junk
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.DS_Store
+````
+
+#
+```bash
+git pull
+# README.md را با متن بالا جایگزین کن
+# .gitignore را ایجاد کن
+
+git add README.md .gitignore
+git commit -m "Clean README, prevent book leaks, add gitignore"
+git push
