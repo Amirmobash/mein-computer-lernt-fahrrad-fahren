@@ -118,7 +118,7 @@ python3 code/testen.py
 
 ## Copyright / Lizenz
 
-* **Buchtext/Manuskript:** © 2025 AmirMobasheraghdam — Alle Rechte vorbehalten (nicht in diesem Repo)
+* **Buchtext/Manuskript:** © 2025 AmirMobasheraghdam — Alle Rechte vorbehalten
 * **Code:** (optional) MIT License
 
 ---
