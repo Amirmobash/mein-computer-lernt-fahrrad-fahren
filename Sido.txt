@@ -1,0 +1,114 @@
+حتماً — این هم همون متن، به شکل دستورالعمل و به زبان آلمانی:
+
+⸻
+
+Screen Recorder auf Raspberry Pi finden / starten (Anleitung)
+
+Es gibt meistens zwei Fälle:
+Entweder ist der Recorder installiert, aber nicht im Menü sichtbar, oder er heißt anders und muss über das Terminal gestartet werden.
+
+⸻
+
+1) Im Menü suchen
+	•	Klicke oben links auf das Raspberry-Symbol.
+	•	Gehe zu Sound & Video oder Accessories.
+	•	Suche nach Programmen wie:
+	•	Screen Recorder
+	•	SimpleScreenRecorder
+	•	OBS
+	•	Kazam
+
+Tipp: Du kannst im Suchfeld im Menü auch einfach screen oder record eingeben.
+
+⸻
+
+2) Über das Terminal starten (schnellster Weg)
+
+Öffne das Terminal und probiere diese Befehle nacheinander:
+
+simplescreenrecorder
+
+obs
+
+kazam
+
+gtk-recordmydesktop
+
+Wenn das Programm installiert ist, startet es entweder direkt – oder es kommt nicht die Meldung command not found.
+
+⸻
+
+3) Prüfen, was wirklich installiert ist
+
+Führe diese Befehle aus:
+
+apt list --installed | grep -i recorder
+
+apt list --installed | grep -i screen
+
+Wenn etwas installiert ist, siehst du z.B.:
+simplescreenrecorder/... [installed] oder obs-studio/... [installed].
+
+⸻
+
+4) Falls mit Flatpak installiert wurde (Icon manchmal versteckt)
+
+Prüfen:
+
+flatpak list | grep -i obs
+
+Starten (Beispiel OBS):
+
+flatpak run com.obsproject.Studio
+
+
+⸻
+
+5) Wenn nichts installiert ist: Recorder installieren
+
+Empfohlene Optionen für Raspberry Pi:
+
+Option A (leicht und einfach):
+
+sudo apt update
+sudo apt install simplescreenrecorder -y
+
+Start:
+
+simplescreenrecorder
+
+Option B (professioneller):
+
+sudo apt install obs-studio -y
+
+Start:
+
+obs
+
+
+⸻
+
+6) Wichtiger Hinweis: Wayland vs. X11
+
+Auf neueren Raspberry Pi OS-Versionen (mit Wayland) funktionieren manche Recorder (z.B. SimpleScreenRecorder) nicht richtig oder sind im Menü nicht sichtbar.
+
+In diesem Fall:
+	•	Am besten: Recorder über das Terminal starten (siehe Punkt 2)
+	•	Oder (falls nötig): auf X11 umstellen:
+
+sudo raspi-config
+
+Dann in den Display/Desktop-Einstellungen Wayland/X11 → X11 wählen und neu starten.
+
+⸻
+
+Wenn du willst, sag mir kurz diese Ausgaben:
+	1.	
+
+apt list --installed | grep -i -E "obs|kazam|simplescreenrecorder|recordmydesktop|recorder"
+
+	2.	(falls Flatpak genutzt wird)
+
+flatpak list
+
+Dann kann ich dir genau sagen, welcher Recorder installiert ist und wie du ihn startest.
