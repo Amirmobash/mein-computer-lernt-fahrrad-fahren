@@ -26,3 +26,51 @@ python3 fahrrad_lernen.py
 ```bash
 pip show flatbuffers protobuf | sed -n '1,40p'
 ```
+مشکل الان **۲ تاست** (طبق خط قرمز عکس):
+
+1. تو قبلاً `protobuf<5` نصب کردی، ولی **TensorFlow 2.20.0 می‌گه باید `protobuf>=5.28.0` باشه**.
+2. `flatbuffers` اشتباهی دوباره رفته روی نسخه‌ی خیلی قدیمی `2018...` (از cache/پکیج‌های قدیمی) و باز هم باعث خطای `imp` می‌شه.
+
+✅ این دستورات رو **دقیقاً همین‌طوری** داخل همون venv (`(meine_umgebung)`) بزن:
+
+```bash
+cd ~/fahrrad_projekt
+source meine_umgebung/bin/activate
+
+pip uninstall -y flatbuffers protobuf
+pip cache purge
+
+pip install --no-cache-dir "protobuf>=5.28.0,<6"
+pip install --no-cache-dir "flatbuffers==24.3.25"
+```
+
+### بعدش تست کن (باید بدون Error باشد)
+
+```bash
+python3 -c "import flatbuffers, google.protobuf; print('flatbuffers:', flatbuffers.__version__); print('protobuf:', google.protobuf.__version__)"
+python3 -c "import tensorflow as tf; print('TF OK:', tf.__version__)"
+```
+
+اگر این دو تست OK بود، دوباره آموزش را اجرا کن:
+
+```bash
+python3 fahrrad_lernen.py
+```
+
+---
+
+### اگر باز هم TensorFlow گیر داد (برای هماهنگ‌سازی کامل)
+
+این رو یک بار بزن تا tensorflow وابستگی‌ها رو دوباره مرتب کند:
+
+```bash
+pip install --no-cache-dir --force-reinstall "tensorflow==2.20.0"
+```
+
+بعد دوباره:
+
+```bash
+python3 -c "import tensorflow as tf; print('TF OK:', tf.__version__)"
+```
+
+هر جا خطا داد، فقط **۳ خط آخر** ارور رو بفرست.
