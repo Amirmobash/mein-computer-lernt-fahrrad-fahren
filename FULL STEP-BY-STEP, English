@@ -1,0 +1,557 @@
+```md
+# Raspberry Pi 5 — Bicycle Detector (FULL STEP-BY-STEP, English)
+
+This is the complete, no-shortcuts command list from **start to finish**.
+Run commands in order.
+
+---
+
+## 0) Open Terminal
+You should see a prompt like:
+```
+
+amir@Amir:~ $
+
+````
+
+(Optional) confirm current folder:
+```bash
+pwd
+````
+
+---
+
+## 1) Update the system + install required tools
+
+```bash
+sudo apt update && sudo apt full-upgrade -y
+sudo apt install -y python3-pip python3-venv python3-tk
+```
+
+---
+
+## 2) Create project folder + create/activate virtual environment
+
+```bash
+mkdir -p ~/fahrrad_projekt
+cd ~/fahrrad_projekt
+
+python3 -m venv meine_umgebung
+source meine_umgebung/bin/activate
+```
+
+✅ Your prompt should now start with:
+
+```
+(meine_umgebung)
+```
+
+Upgrade pip tools:
+
+```bash
+python -m pip install -U pip setuptools wheel
+```
+
+---
+
+## 3) Install Python packages (stable pins for Python 3.13 on Raspberry Pi)
+
+These pins avoid the old `flatbuffers ... import imp` error and fix protobuf conflicts.
+
+```bash
+pip install --no-cache-dir "protobuf>=5.28.0,<6" "flatbuffers>=24.3.25,<25"
+pip install --no-cache-dir "tensorflow==2.20.0" "numpy" "pillow" "scipy"
+```
+
+Sanity check (recommended):
+
+```bash
+python3 -c "import tensorflow as tf, flatbuffers, google.protobuf, scipy; print('TF:', tf.__version__); print('flatbuffers:', flatbuffers.__version__); print('protobuf:', google.protobuf.__version__); print('scipy:', scipy.__version__)"
+```
+
+---
+
+## 4) Create dataset folders (exact structure)
+
+```bash
+cd ~/fahrrad_projekt
+mkdir -p daten/train/bicycle daten/train/not_bicycle daten/test/bicycle daten/test/not_bicycle
+ls -R daten
+```
+
+You should see:
+
+* `daten/train/bicycle`
+* `daten/train/not_bicycle`
+* `daten/test/bicycle`
+* `daten/test/not_bicycle`
+
+---
+
+## 5) Put images into the folders (File Manager)
+
+Open File Manager in the project folder:
+
+```bash
+xdg-open .
+```
+
+### Where to copy images:
+
+Bicycle images:
+
+* `daten/train/bicycle/`
+* `daten/test/bicycle/`
+
+Non-bicycle images:
+
+* `daten/train/not_bicycle/`
+* `daten/test/not_bicycle/`
+
+### Filenames:
+
+Any names are fine. Keep only image files:
+
+* `.jpg` / `.jpeg` / `.png`
+
+Check counts (none should be zero):
+
+```bash
+ls daten/train/bicycle | wc -l
+ls daten/train/not_bicycle | wc -l
+ls daten/test/bicycle | wc -l
+ls daten/test/not_bicycle | wc -l
+```
+
+---
+
+## 6) Create the training script: fahrrad_lernen.py
+
+```bash
+nano fahrrad_lernen.py
+```
+
+Paste this FULL code:
+
+```python
+import os
+import tensorflow as tf
+from tensorflow.keras import layers, models
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+IMG_SIZE = (150, 150)
+BATCH_SIZE = 16
+EPOCHS = 5
+
+TRAIN_DIR = "daten/train"
+TEST_DIR = "daten/test"
+
+MODEL_OUT_H5 = "mein_fahrrad_modell.h5"
+MODEL_OUT_KERAS = "mein_fahrrad_modell.keras"  # modern format
+
+
+def count_images(folder: str) -> int:
+    count = 0
+    for root, _, files in os.walk(folder):
+        for f in files:
+            if f.lower().endswith((".jpg", ".jpeg", ".png")):
+                count += 1
+    return count
+
+
+print("\n=== DATA CHECK ===")
+print(f"Train folder: {TRAIN_DIR}  -> images: {count_images(TRAIN_DIR)}")
+print(f"Test folder : {TEST_DIR}   -> images: {count_images(TEST_DIR)}")
+print()
+
+train_datagen = ImageDataGenerator(
+    rescale=1.0 / 255.0,
+    rotation_range=10,
+    width_shift_range=0.05,
+    height_shift_range=0.05,
+    zoom_range=0.10,
+    horizontal_flip=True
+)
+
+test_datagen = ImageDataGenerator(rescale=1.0 / 255.0)
+
+train_generator = train_datagen.flow_from_directory(
+    TRAIN_DIR,
+    target_size=IMG_SIZE,
+    batch_size=BATCH_SIZE,
+    class_mode="binary",
+    color_mode="rgb",
+    shuffle=True
+)
+
+test_generator = test_datagen.flow_from_directory(
+    TEST_DIR,
+    target_size=IMG_SIZE,
+    batch_size=BATCH_SIZE,
+    class_mode="binary",
+    color_mode="rgb",
+    shuffle=False
+)
+
+print("\n=== CLASS INDICES ===")
+print(train_generator.class_indices)
+
+steps_per_epoch = max(1, train_generator.samples // BATCH_SIZE)
+validation_steps = max(1, test_generator.samples // BATCH_SIZE)
+
+model = models.Sequential([
+    layers.Input(shape=(IMG_SIZE[0], IMG_SIZE[1], 3)),
+
+    layers.Conv2D(32, (3, 3), activation="relu"),
+    layers.MaxPooling2D(2, 2),
+
+    layers.Conv2D(64, (3, 3), activation="relu"),
+    layers.MaxPooling2D(2, 2),
+
+    layers.Conv2D(128, (3, 3), activation="relu"),
+    layers.MaxPooling2D(2, 2),
+
+    layers.Flatten(),
+    layers.Dense(256, activation="relu"),
+    layers.Dense(1, activation="sigmoid")
+])
+
+model.compile(
+    optimizer="adam",
+    loss="binary_crossentropy",
+    metrics=["accuracy"]
+)
+
+print("\n=== Training starts now! ===")
+print("Be patient: Raspberry Pi may be slower than a big PC.\n")
+
+history = model.fit(
+    train_generator,
+    steps_per_epoch=steps_per_epoch,
+    epochs=EPOCHS,
+    validation_data=test_generator,
+    validation_steps=validation_steps
+)
+
+model.save(MODEL_OUT_H5)
+model.save(MODEL_OUT_KERAS)
+
+print(f"\n=== Done! Saved as '{MODEL_OUT_H5}' and '{MODEL_OUT_KERAS}' ===")
+```
+
+Save & exit nano:
+
+* Press `CTRL + O` then `ENTER`
+* Press `CTRL + X`
+
+---
+
+## 7) Run training
+
+Make sure venv is active:
+
+```bash
+cd ~/fahrrad_projekt
+source meine_umgebung/bin/activate
+```
+
+Run:
+
+```bash
+python3 fahrrad_lernen.py
+```
+
+After training finishes, confirm model files exist:
+
+```bash
+ls -l mein_fahrrad_modell.h5 mein_fahrrad_modell.keras
+```
+
+---
+
+## 8) Optional: Install Drag & Drop support for GUI
+
+```bash
+pip install --no-cache-dir tkinterdnd2
+```
+
+---
+
+## 9) Create the GUI test script: testen.py
+
+```bash
+nano testen.py
+```
+
+Paste this FULL code:
+
+```python
+import os
+import sys
+import numpy as np
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk
+
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import image as keras_image
+
+MODEL_PATH = "mein_fahrrad_modell.h5"
+IMG_SIZE = (150, 150)
+
+DND_AVAILABLE = False
+try:
+    from tkinterdnd2 import TkinterDnD, DND_FILES
+    DND_AVAILABLE = True
+except Exception:
+    DND_AVAILABLE = False
+
+
+def predict_image(model, img_path: str):
+    img = keras_image.load_img(img_path, target_size=IMG_SIZE)
+    arr = keras_image.img_to_array(img) / 255.0
+    arr = np.expand_dims(arr, axis=0)
+
+    pred = float(model.predict(arr, verbose=0)[0][0])  # probability for class "1"
+    prob_not_bicycle = pred
+    prob_bicycle = 1.0 - pred
+
+    if prob_bicycle >= prob_not_bicycle:
+        label = "BICYCLE"
+        confidence = prob_bicycle
+    else:
+        label = "NOT BICYCLE"
+        confidence = prob_not_bicycle
+
+    return label, confidence, prob_bicycle, prob_not_bicycle
+
+
+def is_image_file(path: str) -> bool:
+    return path.lower().endswith((".jpg", ".jpeg", ".png"))
+
+
+class BicycleGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Bicycle Detector (Raspberry Pi)")
+        self.root.geometry("820x560")
+        self.root.minsize(820, 560)
+
+        if not os.path.isfile(MODEL_PATH):
+            messagebox.showerror(
+                "Model file not found",
+                f"Cannot find model file:\n{MODEL_PATH}\n\n"
+                "Please train first:\npython3 fahrrad_lernen.py"
+            )
+            self.root.destroy()
+            return
+
+        self.model = load_model(MODEL_PATH, compile=False)
+        self._tk_preview = None
+
+        top = tk.Frame(root)
+        top.pack(fill="x", padx=12, pady=(12, 6))
+
+        title = tk.Label(top, text="Bicycle Detector", font=("Arial", 20, "bold"))
+        title.pack(anchor="w")
+
+        subtitle_text = "Open a JPG/PNG image to classify it."
+        if DND_AVAILABLE:
+            subtitle_text += " Drag & Drop: ENABLED"
+        else:
+            subtitle_text += " (Install drag & drop: pip install tkinterdnd2)"
+        self.subtitle = tk.Label(top, text=subtitle_text, font=("Arial", 10), fg="gray")
+        self.subtitle.pack(anchor="w", pady=(4, 0))
+
+        main = tk.Frame(root)
+        main.pack(fill="both", expand=True, padx=12, pady=8)
+
+        self.left = tk.Frame(main, bd=2, relief="groove")
+        self.left.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+        self.drop_label = tk.Label(
+            self.left,
+            text="DROP IMAGE HERE\n(or click 'Open Image')",
+            font=("Arial", 14, "bold"),
+            bg="#f3f3f3",
+            width=52,
+            height=18
+        )
+        self.drop_label.pack(fill="both", expand=True, padx=10, pady=10)
+
+        self.right = tk.Frame(main, width=320)
+        self.right.pack(side="right", fill="y")
+
+        btn_frame = tk.Frame(self.right)
+        btn_frame.pack(fill="x", pady=(0, 10))
+
+        self.open_btn = tk.Button(btn_frame, text="Open Image", height=2, command=self.open_image)
+        self.open_btn.pack(fill="x", pady=(0, 6))
+
+        self.clear_btn = tk.Button(btn_frame, text="Clear", height=2, command=self.clear)
+        self.clear_btn.pack(fill="x")
+
+        self.file_lbl = tk.Label(self.right, text="File: (none)", wraplength=300, justify="left")
+        self.file_lbl.pack(fill="x", pady=(10, 10))
+
+        self.result_title = tk.Label(self.right, text="Result:", font=("Arial", 14, "bold"))
+        self.result_title.pack(anchor="w")
+
+        self.result_lbl = tk.Label(self.right, text="—", font=("Arial", 22, "bold"))
+        self.result_lbl.pack(fill="x", pady=(6, 12))
+
+        self.prob_lbl = tk.Label(self.right, text="bicycle: —\nnot_bicycle: —", font=("Arial", 12), justify="left")
+        self.prob_lbl.pack(fill="x", pady=(0, 10))
+
+        self.conf_title = tk.Label(self.right, text="Confidence:", font=("Arial", 12, "bold"))
+        self.conf_title.pack(anchor="w")
+
+        self.canvas = tk.Canvas(self.right, width=300, height=34)
+        self.canvas.pack(pady=(6, 0))
+
+        self.canvas.create_rectangle(10, 10, 290, 24, outline="black")
+        self.bar = self.canvas.create_rectangle(10, 10, 10, 24, fill="green", outline="")
+        self.bar_text = self.canvas.create_text(150, 17, text="0%")
+
+        if DND_AVAILABLE:
+            self.drop_label.drop_target_register(DND_FILES)
+            self.drop_label.dnd_bind("<<Drop>>", self.on_drop)
+
+        if len(sys.argv) >= 2:
+            p = sys.argv[1]
+            if os.path.isfile(p) and is_image_file(p):
+                self.handle_image(p)
+
+    def open_image(self):
+        path = filedialog.askopenfilename(
+            title="Choose an image",
+            filetypes=[("Images", "*.jpg *.jpeg *.png"), ("All files", "*.*")]
+        )
+        if path:
+            self.handle_image(path)
+
+    def on_drop(self, event):
+        data = event.data.strip()
+        if data.startswith("{") and data.endswith("}"):
+            data = data[1:-1]
+        path = data.split()[0]
+        if os.path.isfile(path) and is_image_file(path):
+            self.handle_image(path)
+        else:
+            messagebox.showerror("Error", "Please drop a valid JPG/PNG file.")
+
+    def clear(self):
+        self.file_lbl.configure(text="File: (none)")
+        self.result_lbl.configure(text="—", fg="black")
+        self.prob_lbl.configure(text="bicycle: —\nnot_bicycle: —")
+        self.drop_label.configure(image="", text="DROP IMAGE HERE\n(or click 'Open Image')")
+        self._tk_preview = None
+        self.canvas.coords(self.bar, 10, 10, 10, 24)
+        self.canvas.itemconfig(self.bar_text, text="0%")
+        self.canvas.itemconfig(self.bar, fill="green")
+
+    def handle_image(self, path: str):
+        if not is_image_file(path):
+            messagebox.showerror("Error", "Only JPG/PNG images are supported.")
+            return
+
+        self.file_lbl.configure(text=f"File: {path}")
+
+        try:
+            img = Image.open(path).convert("RGB")
+            preview = img.copy()
+            preview.thumbnail((560, 360))
+            self._tk_preview = ImageTk.PhotoImage(preview)
+            self.drop_label.configure(image=self._tk_preview, text="")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open image:\n{e}")
+            return
+
+        try:
+            label, conf, p_bike, p_not = predict_image(self.model, path)
+        except Exception as e:
+            messagebox.showerror("Error", f"Prediction failed:\n{e}")
+            return
+
+        self.result_lbl.configure(text=label, fg=("green" if label == "BICYCLE" else "red"))
+        self.prob_lbl.configure(text=f"bicycle: {p_bike:.4f}\nnot_bicycle: {p_not:.4f}")
+
+        conf_pct = int(round(conf * 100))
+        x0 = 10
+        x1 = 10 + int(280 * conf)
+        self.canvas.coords(self.bar, x0, 10, x1, 24)
+        self.canvas.itemconfig(self.bar_text, text=f"{conf_pct}%")
+        self.canvas.itemconfig(self.bar, fill=("green" if label == "BICYCLE" else "red"))
+
+
+def main():
+    if DND_AVAILABLE:
+        root = TkinterDnD.Tk()
+    else:
+        root = tk.Tk()
+    BicycleGUI(root)
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Save & exit nano:
+
+* Press `CTRL + O` then `ENTER`
+* Press `CTRL + X`
+
+---
+
+## 10) Run the GUI classifier
+
+```bash
+cd ~/fahrrad_projekt
+source meine_umgebung/bin/activate
+python3 testen.py
+```
+
+Optional CLI run:
+
+```bash
+python3 testen.py daten/test/bicycle/your_image.jpg
+```
+
+---
+
+## 11) GitHub (optional, recommended)
+
+Create .gitignore:
+
+```bash
+nano .gitignore
+```
+
+Paste:
+
+```
+meine_umgebung/
+daten/
+__pycache__/
+*.pyc
+*.h5
+*.keras
+```
+
+Create requirements.txt:
+
+```bash
+pip freeze > requirements.txt
+```
+
+Initialize git and push:
+
+```bash
+git init
+git add fahrrad_lernen.py testen.py README.md requirements.txt .gitignore
+git commit -m "Bicycle detector for Raspberry Pi"
+```
+
+```
+```
