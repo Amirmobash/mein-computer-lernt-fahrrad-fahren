@@ -71,22 +71,26 @@ Beispiel-Dateien:
 
 ## Training
 
-Lege deinen Trainings-Code z.B. in `code/fahrrad_lernen.py` ab und starte:
-باشه — این **کد کاملِ داخل کتاب** برای دو فایل `fahrrad_lernen.py` و `testen.py` هست (همه‌چیز انگلیسی)، دقیقاً مطابق متن PDF. 
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import image
+import numpy as np
 
----
+model = load_model('mein_fahrrad_modell.h5')
 
-## 1) فایل آموزش: `fahrrad_lernen.py`
+# CHANGE THIS to a real file name from your test folder:
+img_path = 'daten/test/bicycle/dein_test_bild.jpg'
 
-ساخت فایل:
+img = image.load_img(img_path, target_size=(150, 150))
+img_array = image.img_to_array(img) / 255.0
+img_array = np.expand_dims(img_array, axis=0)
 
-```bash
-nano fahrrad_lernen.py
-```
+prediction = model.predict(img_array)
 
-این کد را **کامل** Paste کن:
+if prediction[0] > 0.5:
+    print("This is a BICYCLE!")
+else:
+    print("This is NOT a bicycle.")
 
-```python
 import tensorflow as tf
 from tensorflow.keras import layers, models
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
