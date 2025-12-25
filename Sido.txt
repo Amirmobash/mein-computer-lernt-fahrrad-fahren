@@ -1,12 +1,3 @@
-حتماً — این هم همون متن، به شکل دستورالعمل و به زبان آلمانی:
-
-⸻
-
-Screen Recorder auf Raspberry Pi finden / starten (Anleitung)
-
-Es gibt meistens zwei Fälle:
-Entweder ist der Recorder installiert, aber nicht im Menü sichtbar, oder er heißt anders und muss über das Terminal gestartet werden.
-
 ⸻
 
 1) Im Menü suchen
