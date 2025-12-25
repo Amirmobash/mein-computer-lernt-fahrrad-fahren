@@ -1,0 +1,28 @@
+این خطا همونه: **`ModuleNotFoundError: No module named 'imp'`**
+یعنی هنوز داخل venv تو، پکیج **flatbuffers قدیمی** هست و با Python 3.13 ناسازگاره. باید flatbuffers رو **آپدیت کنی** (و بهتره protobuf هم پین بشه).
+
+داخل همین ترمینال که `(meine_umgebung)` فعاله، دقیقاً این‌ها رو بزن:
+
+```bash
+pip uninstall -y flatbuffers
+pip install -U pip setuptools wheel
+pip install "flatbuffers>=24.3.25" "protobuf<5"
+```
+
+بعد تست کن که درست شد:
+
+```bash
+python3 -c "import tensorflow as tf; print('TF OK:', tf.__version__)"
+```
+
+اگر این OK بود، دوباره آموزش رو اجرا کن:
+
+```bash
+python3 fahrrad_lernen.py
+```
+
+اگر باز هم خطا داد، این دستور رو بزن و خروجیش رو بده (برای اینکه ببینیم دقیقاً کدوم نسخه flatbuffers نصب شده):
+
+```bash
+pip show flatbuffers protobuf | sed -n '1,40p'
+```
