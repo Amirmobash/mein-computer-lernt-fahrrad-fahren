@@ -8,5 +8,3 @@ apt list --installed | grep -i -E "obs|kazam|simplescreenrecorder|recordmydeskto
 	2.	(falls Flatpak genutzt wird)
 
 flatpak list
-
-Dann kann ich dir genau sagen, welcher Recorder installiert ist und wie du ihn startest.
