@@ -72,6 +72,126 @@ Beispiel-Dateien:
 ## Training
 
 Lege deinen Trainings-Code z.B. in `code/fahrrad_lernen.py` ab und starte:
+باشه — این **کد کاملِ داخل کتاب** برای دو فایل `fahrrad_lernen.py` و `testen.py` هست (همه‌چیز انگلیسی)، دقیقاً مطابق متن PDF. 
+
+---
+
+## 1) فایل آموزش: `fahrrad_lernen.py`
+
+ساخت فایل:
+
+```bash
+nano fahrrad_lernen.py
+```
+
+این کد را **کامل** Paste کن:
+
+```python
+import tensorflow as tf
+from tensorflow.keras import layers, models
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+# --- 1) DATA: prepare images ---
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+    shear_range=0.2,
+    zoom_range=0.2,
+    horizontal_flip=True
+)
+
+test_datagen = ImageDataGenerator(rescale=1./255)
+
+train_generator = train_datagen.flow_from_directory(
+    'daten/train',
+    target_size=(150, 150),
+    batch_size=16,
+    class_mode='binary'
+)
+
+test_generator = test_datagen.flow_from_directory(
+    'daten/test',
+    target_size=(150, 150),
+    batch_size=16,
+    class_mode='binary'
+)
+
+# --- 2) MODEL: build a small network (Pi-friendly) ---
+model = models.Sequential([
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)),
+    layers.MaxPooling2D(2, 2),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D(2, 2),
+    layers.Conv2D(128, (3, 3), activation='relu'),
+    layers.MaxPooling2D(2, 2),
+    layers.Flatten(),
+    layers.Dense(256, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
+
+model.compile(
+    optimizer='adam',
+    loss='binary_crossentropy',
+    metrics=['accuracy']
+)
+
+print("\n=== Training starts now! ===")
+print("Be patient: Raspberry Pi may be slower than a big PC.\n")
+
+# --- 3) TRAIN ---
+history = model.fit(
+    train_generator,
+    steps_per_epoch=max(1, train_generator.samples // 16),
+    epochs=5,
+    validation_data=test_generator,
+    validation_steps=max(1, test_generator.samples // 16)
+)
+
+# --- 4) SAVE ---
+model.save('mein_fahrrad_modell.h5')
+print("\n=== Done! Saved as 'mein_fahrrad_modell.h5' ===")
+```
+
+
+
+
+```bash
+python3 fahrrad_lernen.py
+```
+
+```bash
+nano testen.py
+```
+:
+
+```python
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import image
+import numpy as np
+
+model = load_model('mein_fahrrad_modell.h5')
+
+# CHANGE THIS to a real file name from your test folder:
+img_path = 'daten/test/bicycle/dein_test_bild.jpg'
+
+img = image.load_img(img_path, target_size=(150, 150))
+img_array = image.img_to_array(img) / 255.0
+img_array = np.expand_dims(img_array, axis=0)
+
+prediction = model.predict(img_array)
+
+if prediction[0] > 0.5:
+    print("This is a BICYCLE!")
+else:
+    print("This is NOT a bicycle.")
+```
+
+
+
+
+```bash
+python3 testen.py
+```
+
 
 ```bash
 python3 code/fahrrad_lernen.py
