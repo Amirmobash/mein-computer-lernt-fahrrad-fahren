@@ -234,7 +234,7 @@ python3 testen.py
 
 ---
 
-# 12) Wenn es falsch erkennt (NOT BICYCLE → BICYCLE)
+# 12) Wenn es falsch erkennt (NOT BICYCLE → BICYCLE) Amir Mobasheraghdam
 
 ✅ Lösung:
 
