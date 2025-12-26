@@ -1,84 +1,120 @@
 ````md
-# 🚲 Bicycle Detector (Raspberry Pi 5) — Schritt für Schritt (für Kinder)
+# 🚲 Mein Computer lernt Fahrrad fahren (Raspberry Pi 5) — Kinder-README (DE)
 
-✅ **Wichtig:** Die große Projekt-Datei ist NICHT direkt auf GitHub (zu groß).  
-Du lädst sie über diesen Link herunter und machst dann weiter.
+Hier lernst du, wie dein Raspberry Pi Bilder anschaut und sagt:
 
-## 📥 1) Projekt-Datei herunterladen (LimeWire)
-👉 Öffne diesen Link im Browser:
+✅ **BICYCLE** (Fahrrad)  
+❌ **NOT BICYCLE** (kein Fahrrad)
 
-https://limewire.com/d/qLV4k#DsNmQDDfxe
-
-Dann:
-1. Klicke auf **Download**
-2. Warte bis der Download fertig ist
-
-✅ Die Datei liegt danach meistens im Ordner **Downloads**.
+**Wichtig:** Die Befehle im Terminal sind **Englisch** (so wie im Buch).  
+Du tippst sie **Zeile für Zeile** genau so ein.
 
 ---
 
-## 📦 2) Entpacken (Extract)
-### Option A: Mit dem Datei-Manager (am einfachsten)
+# 📦 0) Das Projekt herunterladen (große Datei ist NICHT auf GitHub)
+
+Die Projekt-Datei ist zu groß für GitHub. Du lädst sie hier herunter:
+
+👉 **Download-Link (LimeWire):**  
+https://limewire.com/d/qLV4k#DsNmQDDfxe
+
+## 0.1 So lädst du die Datei herunter (ganz einfach)
+1. Öffne den Link im Browser.
+2. Klicke auf **Download**.
+3. Warte bis es fertig ist.
+
+✅ Danach liegt die Datei meistens in **Downloads**:  
+`/home/pi/Downloads/`
+
+Die Datei heißt z.B.:
+- `fahrrad_projekt.7z` (oder ähnlich)
+
+---
+
+# 🧰 1) Entpacken (Extract) + in den Home-Ordner legen
+
+## Option A — mit File Manager (am leichtesten)
 1. Öffne **File Manager**
 2. Gehe zu **Downloads**
-3. Rechtsklick auf die Datei (z.B. `fahrrad_projekt.7z`)
-4. Klicke **Extract Here** oder **Extract to…**
+3. Rechtsklick auf `fahrrad_projekt.7z`
+4. Wähle **Extract Here** oder **Extract to…**
 
-Du bekommst danach einen Ordner: **`fahrrad_projekt`**
+✅ Danach hast du einen Ordner:
+- `fahrrad_projekt`
 
-### Option B: Mit Terminal
-Öffne Terminal und tippe:
+## Option B — mit Terminal (wenn du lieber tippst)
+
+Terminal öffnen und eingeben:
 
 ```bash
 cd ~/Downloads
+sudo apt update
+sudo apt install -y p7zip-full
 7z x fahrrad_projekt.7z
 ````
 
+✅ Danach sollte der Ordner hier sein:
+`~/Downloads/fahrrad_projekt`
+
 ---
 
-## 📁 3) Ordner in den Home-Ordner verschieben
+## 1.1 Ordner in den Home-Ordner verschieben
 
-Wir wollen, dass der Ordner hier ist:
+Wir wollen den Projektordner hier haben:
 
-`/home/pi/fahrrad_projekt`
+✅ `~/fahrrad_projekt`
 
-Wenn er noch in Downloads ist, verschiebe ihn so:
+Verschieben:
 
 ```bash
 mv ~/Downloads/fahrrad_projekt ~/
 ```
 
-✅ Prüfen:
+Prüfen:
 
 ```bash
 ls ~
 ```
 
-Du solltest `fahrrad_projekt` sehen.
+✅ Du solltest `fahrrad_projekt` sehen.
 
 ---
 
-# 🧪 Jetzt beginnt das Projekt!
-
-## 4) In den Projektordner gehen
+# 🟣 2) Terminal öffnen und in den Projektordner gehen
 
 ```bash
 cd ~/fahrrad_projekt
 pwd
 ```
 
+✅ Erwartet (ähnlich):
+
+```text
+/home/pi/fahrrad_projekt
+```
+
+Wenn `cd` nicht klappt:
+
+1. Tippe `ls ~`
+2. Schau wie der Ordner wirklich heißt
+3. Gehe dann in diesen Ordner
+
 ---
 
-## 5) System updaten + Tools installieren
+# 🛠️ 3) System updaten + Werkzeuge installieren
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
-sudo apt install -y python3-pip python3-venv python3-tk p7zip-full
+sudo apt install -y python3-pip python3-venv python3-tk
 ```
+
+✅ Gut: keine roten **ERROR**-Zeilen.
 
 ---
 
-## 6) Python-Umgebung (venv) erstellen und aktivieren
+# 🧪 4) Python-Umgebung (venv) erstellen und aktivieren
+
+Eine venv ist wie eine saubere „Zauber-Box“ nur für dieses Projekt.
 
 ```bash
 cd ~/fahrrad_projekt
@@ -86,7 +122,11 @@ python3 -m venv meine_umgebung
 source meine_umgebung/bin/activate
 ```
 
-✅ Wenn du `(meine_umgebung)` siehst, ist es richtig.
+✅ Wenn alles richtig ist, siehst du vorne:
+
+```text
+(meine_umgebung)
+```
 
 Dann:
 
@@ -96,14 +136,14 @@ python -m pip install -U pip setuptools wheel
 
 ---
 
-## 7) Pakete installieren (stabil für Raspberry Pi)
+# 📚 5) Python-Pakete installieren (stabil für Raspberry Pi)
 
 ```bash
 pip install --no-cache-dir "protobuf>=5.28.0,<6" "flatbuffers>=24.3.25,<25"
 pip install --no-cache-dir "tensorflow==2.20.0" "numpy" "pillow" "scipy"
 ```
 
-(Optional) Test:
+(Optional) Mini-Test:
 
 ```bash
 python3 -c "import tensorflow as tf; print('TF OK:', tf.__version__)"
@@ -111,35 +151,65 @@ python3 -c "import tensorflow as tf; print('TF OK:', tf.__version__)"
 
 ---
 
-## 8) Bilder-Ordner prüfen
+# 🗂️ 6) Bilder-Ordner (Dataset) prüfen
 
-Diese Ordner müssen existieren:
+Im Projekt gibt es diese Ordner:
 
 * `daten/train/bicycle/`
 * `daten/train/not_bicycle/`
 * `daten/test/bicycle/`
 * `daten/test/not_bicycle/`
 
-Check:
+Prüfen:
 
 ```bash
+cd ~/fahrrad_projekt
 ls -R daten
 ```
 
 ---
 
-## 9) ⭐ Tipp für bessere Treffer: Mehr Bilder = besser!
+# 🖼️ 7) Wo kommen die Bilder hin?
 
-Wenn der Computer manchmal falsch liegt, ist das normal.
+✅ **Fahrrad-Bilder** kommen hier rein:
 
-✅ Je mehr Bilder du sammelst, desto schlauer wird er:
+* `daten/train/bicycle/`
+* `daten/test/bicycle/`
 
-* mehr Fahrräder (verschiedene Winkel, Orte)
-* mehr Nicht-Fahrräder (Stuhl, Auto, Pflanze, Tasche, Schuhe, Helm…)
+✅ **Nicht-Fahrrad-Bilder** (Stuhl, Auto, Pflanze, Tasche …) kommen hier rein:
+
+* `daten/train/not_bicycle/`
+* `daten/test/not_bicycle/`
+
+✅ Erlaubte Bildtypen:
+
+* `.jpg` `.jpeg` `.png`
+
+✅ Dateinamen dürfen so bleiben wie sie sind (egal!).
+
+📂 Ordner im File Manager öffnen:
+
+```bash
+xdg-open .
+```
 
 ---
 
-## 10) Training starten (Modell bauen)
+# ⭐ Super wichtig: Mehr Bilder = schlauerer Computer!
+
+Wenn dein Raspberry Pi manchmal falsch rät, ist das normal.
+
+✅ Damit er genauer wird:
+
+* Sammle **mehr** Bilder
+* Sammle **verschiedenere** Bilder (andere Winkel, andere Orte, anderes Licht)
+* Besonders bei **NOT BICYCLE** viele verschiedene Dinge (Stuhl, Auto, Pflanze, Schuhe, Helm, Scooter …)
+
+Je mehr er sieht, desto besser lernt er.
+
+---
+
+# 🧠 8) Training starten (das „Gehirn“ bauen)
 
 ```bash
 cd ~/fahrrad_projekt
@@ -147,11 +217,11 @@ source meine_umgebung/bin/activate
 python3 fahrrad_lernen.py
 ```
 
-Am Ende entsteht:
+✅ Am Ende entsteht die Modell-Datei:
 
 * `mein_fahrrad_modell.h5`
 
-Check:
+Prüfen:
 
 ```bash
 ls -l mein_fahrrad_modell.h5
@@ -159,27 +229,31 @@ ls -l mein_fahrrad_modell.h5
 
 ---
 
-## 11) Test-App starten (GUI)
+# 🪟 9) Test-App starten (GUI)
 
 ```bash
+cd ~/fahrrad_projekt
+source meine_umgebung/bin/activate
 python3 testen.py
 ```
 
 Dann:
 
-* **Open Image** klicken
-* Bild auswählen
-* Ergebnis anschauen: **BICYCLE** oder **NOT BICYCLE**
+* Klicke **Open Image**
+* Wähle ein Bild
+* Schau das Ergebnis: **BICYCLE** oder **NOT BICYCLE**
 
 ---
 
-## 12) Optional: Drag & Drop aktivieren
+# 🧲 10) Optional: Drag & Drop aktivieren
 
 ```bash
 pip install --no-cache-dir tkinterdnd2
 python3 testen.py
 ```
 
-✅ Fertig! Viel Spaß 🚲🤖
+---
 
-```
+# ✅ Fertig!
+
+Du hast deinem Raspberry Pi etwas Neues beigebracht. 🚲🤖
