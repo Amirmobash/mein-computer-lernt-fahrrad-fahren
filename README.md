@@ -16,8 +16,7 @@ und testest danach Bilder in einer App.
 ⚠️ Die Projekt-Datei ist zu groß für GitHub.  
 👉 Du lädst sie hier herunter (LimeWire):
 
-https://limewire.com/d/qLV4k#DsNmQDDfxe
-
+https://www.dropbox.com/t/5BKLy684gWYmyOt7
 ## 0.1 Download (super einfach)
 1) Öffne den Link im Browser  
 2) Klicke **Download**  
