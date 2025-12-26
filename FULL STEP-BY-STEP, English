@@ -1,36 +1,52 @@
-```md
-# Raspberry Pi 5 — Bicycle Detector (FULL STEP-BY-STEP, English)
-
-This is the complete, no-shortcuts command list from **start to finish**.
-Run commands in order.
+Below is a **clean, kid-friendly, line-by-line English tutorial** you can paste into **README.md** on GitHub. It is based on your working command flow + the scripts you already have. 
 
 ---
+
+# Raspberry Pi 5 — Bicycle Detector (Step-by-Step, English)
+
+Goal: teach the Raspberry Pi to classify images as **BICYCLE** or **NOT BICYCLE**.
 
 ## 0) Open Terminal
-You should see a prompt like:
+
+Open **Terminal** and you should see something like:
+
+```bash
+amir@Amir:~ $
 ```
 
-amir@Amir:~ $
+(Optional) check where you are:
 
-````
-
-(Optional) confirm current folder:
 ```bash
 pwd
-````
+```
+
+Expected: something like
+
+```bash
+/home/amir
+```
 
 ---
 
-## 1) Update the system + install required tools
+## 1) Update Raspberry Pi + install tools
+
+Run:
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
 sudo apt install -y python3-pip python3-venv python3-tk
 ```
 
+Expected (similar):
+
+* `All packages are up to date.` OR it installs updates
+* No red “ERROR” lines
+
 ---
 
-## 2) Create project folder + create/activate virtual environment
+## 2) Create project folder + virtual environment (venv)
+
+Run:
 
 ```bash
 mkdir -p ~/fahrrad_projekt
@@ -40,10 +56,10 @@ python3 -m venv meine_umgebung
 source meine_umgebung/bin/activate
 ```
 
-✅ Your prompt should now start with:
+Expected: your prompt **starts with**:
 
-```
-(meine_umgebung)
+```bash
+(meine_umgebung) amir@Amir:~/fahrrad_projekt $
 ```
 
 Upgrade pip tools:
@@ -54,24 +70,30 @@ python -m pip install -U pip setuptools wheel
 
 ---
 
-## 3) Install Python packages (stable pins for Python 3.13 on Raspberry Pi)
+## 3) Install Python packages (stable for Raspberry Pi)
 
-These pins avoid the old `flatbuffers ... import imp` error and fix protobuf conflicts.
+These versions avoid the **“No module named imp”** problem and the **protobuf conflict** you saw earlier.
+
+Run:
 
 ```bash
 pip install --no-cache-dir "protobuf>=5.28.0,<6" "flatbuffers>=24.3.25,<25"
 pip install --no-cache-dir "tensorflow==2.20.0" "numpy" "pillow" "scipy"
 ```
 
-Sanity check (recommended):
+Check versions (optional but recommended):
 
 ```bash
 python3 -c "import tensorflow as tf, flatbuffers, google.protobuf, scipy; print('TF:', tf.__version__); print('flatbuffers:', flatbuffers.__version__); print('protobuf:', google.protobuf.__version__); print('scipy:', scipy.__version__)"
 ```
 
+Expected: it prints versions (no crash).
+
 ---
 
-## 4) Create dataset folders (exact structure)
+## 4) Create the dataset folders (exact structure)
+
+Run:
 
 ```bash
 cd ~/fahrrad_projekt
@@ -79,42 +101,48 @@ mkdir -p daten/train/bicycle daten/train/not_bicycle daten/test/bicycle daten/te
 ls -R daten
 ```
 
-You should see:
+Expected:
 
-* `daten/train/bicycle`
-* `daten/train/not_bicycle`
-* `daten/test/bicycle`
-* `daten/test/not_bicycle`
+```bash
+daten:
+test  train
+
+daten/test:
+bicycle  not_bicycle
+
+daten/train:
+bicycle  not_bicycle
+```
 
 ---
 
 ## 5) Put images into the folders (File Manager)
 
-Open File Manager in the project folder:
+Open the folder:
 
 ```bash
 xdg-open .
 ```
 
-### Where to copy images:
+Now copy images:
 
-Bicycle images:
+### Bicycle images go here
 
 * `daten/train/bicycle/`
 * `daten/test/bicycle/`
 
-Non-bicycle images:
+### Not-bicycle images go here
 
 * `daten/train/not_bicycle/`
 * `daten/test/not_bicycle/`
 
-### Filenames:
+**Important rules**
 
-Any names are fine. Keep only image files:
+* Only `.jpg` / `.jpeg` / `.png`
+* Names can be ANYTHING (even weird downloaded names) ✅
+  Just don’t mix the classes.
 
-* `.jpg` / `.jpeg` / `.png`
-
-Check counts (none should be zero):
+Check counts (none should be 0):
 
 ```bash
 ls daten/train/bicycle | wc -l
@@ -123,18 +151,23 @@ ls daten/test/bicycle | wc -l
 ls daten/test/not_bicycle | wc -l
 ```
 
+Tip: try to keep counts **similar** (example: 25 bicycle + 25 not-bicycle for train).
+
 ---
 
-## 6) Create the training script: fahrrad_lernen.py
+## 6) Create training script: `fahrrad_lernen.py`
+
+Create/edit:
 
 ```bash
 nano fahrrad_lernen.py
 ```
 
-Paste this FULL code:
+Paste this full code (this matches your working training logic and saves both formats). 
 
 ```python
-import os
+import os, math, random
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -146,122 +179,119 @@ EPOCHS = 5
 TRAIN_DIR = "daten/train"
 TEST_DIR = "daten/test"
 
-MODEL_OUT_H5 = "mein_fahrrad_modell.h5"
-MODEL_OUT_KERAS = "mein_fahrrad_modell.keras"  # modern format
+MODEL_H5 = "mein_fahrrad_modell.h5"
+MODEL_KERAS = "mein_fahrrad_modell.keras"
 
+SEED = 42
+random.seed(SEED)
+np.random.seed(SEED)
+tf.random.set_seed(SEED)
 
 def count_images(folder: str) -> int:
-    count = 0
+    c = 0
     for root, _, files in os.walk(folder):
         for f in files:
             if f.lower().endswith((".jpg", ".jpeg", ".png")):
-                count += 1
-    return count
-
+                c += 1
+    return c
 
 print("\n=== DATA CHECK ===")
-print(f"Train folder: {TRAIN_DIR}  -> images: {count_images(TRAIN_DIR)}")
-print(f"Test folder : {TEST_DIR}   -> images: {count_images(TEST_DIR)}")
-print()
+print("Train images:", count_images(TRAIN_DIR))
+print("Test images :", count_images(TEST_DIR))
 
 train_datagen = ImageDataGenerator(
-    rescale=1.0 / 255.0,
+    rescale=1./255,
     rotation_range=10,
+    zoom_range=0.10,
     width_shift_range=0.05,
     height_shift_range=0.05,
-    zoom_range=0.10,
     horizontal_flip=True
 )
+test_datagen = ImageDataGenerator(rescale=1./255)
 
-test_datagen = ImageDataGenerator(rescale=1.0 / 255.0)
-
-train_generator = train_datagen.flow_from_directory(
+train_gen = train_datagen.flow_from_directory(
     TRAIN_DIR,
     target_size=IMG_SIZE,
     batch_size=BATCH_SIZE,
     class_mode="binary",
-    color_mode="rgb",
-    shuffle=True
+    shuffle=True,
+    seed=SEED
 )
 
-test_generator = test_datagen.flow_from_directory(
+test_gen = test_datagen.flow_from_directory(
     TEST_DIR,
     target_size=IMG_SIZE,
     batch_size=BATCH_SIZE,
     class_mode="binary",
-    color_mode="rgb",
     shuffle=False
 )
 
 print("\n=== CLASS INDICES ===")
-print(train_generator.class_indices)
+print(train_gen.class_indices)
 
-steps_per_epoch = max(1, train_generator.samples // BATCH_SIZE)
-validation_steps = max(1, test_generator.samples // BATCH_SIZE)
+steps_per_epoch = max(1, math.ceil(train_gen.samples / BATCH_SIZE))
+val_steps = max(1, math.ceil(test_gen.samples / BATCH_SIZE))
 
 model = models.Sequential([
     layers.Input(shape=(IMG_SIZE[0], IMG_SIZE[1], 3)),
-
-    layers.Conv2D(32, (3, 3), activation="relu"),
-    layers.MaxPooling2D(2, 2),
-
-    layers.Conv2D(64, (3, 3), activation="relu"),
-    layers.MaxPooling2D(2, 2),
-
-    layers.Conv2D(128, (3, 3), activation="relu"),
-    layers.MaxPooling2D(2, 2),
-
+    layers.Conv2D(32, 3, activation="relu"),
+    layers.MaxPooling2D(2),
+    layers.Conv2D(64, 3, activation="relu"),
+    layers.MaxPooling2D(2),
+    layers.Conv2D(128, 3, activation="relu"),
+    layers.MaxPooling2D(2),
     layers.Flatten(),
     layers.Dense(256, activation="relu"),
     layers.Dense(1, activation="sigmoid")
 ])
 
-model.compile(
-    optimizer="adam",
-    loss="binary_crossentropy",
-    metrics=["accuracy"]
-)
+model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
 
 print("\n=== Training starts now! ===")
-print("Be patient: Raspberry Pi may be slower than a big PC.\n")
-
 history = model.fit(
-    train_generator,
+    train_gen,
     steps_per_epoch=steps_per_epoch,
     epochs=EPOCHS,
-    validation_data=test_generator,
-    validation_steps=validation_steps
+    validation_data=test_gen,
+    validation_steps=val_steps
 )
 
-model.save(MODEL_OUT_H5)
-model.save(MODEL_OUT_KERAS)
+model.save(MODEL_H5)
+model.save(MODEL_KERAS)
 
-print(f"\n=== Done! Saved as '{MODEL_OUT_H5}' and '{MODEL_OUT_KERAS}' ===")
+print(f"\n=== Done! Saved as '{MODEL_H5}' and '{MODEL_KERAS}' ===")
 ```
 
-Save & exit nano:
+### Save & exit nano
 
-* Press `CTRL + O` then `ENTER`
-* Press `CTRL + X`
+* Press `CTRL + O` (Write Out)
+* Press `ENTER`
+* Press `CTRL + X` (Exit)
 
 ---
 
-## 7) Run training
+## 7) Train the model
 
-Make sure venv is active:
+Make sure you are in the project folder and venv is active:
 
 ```bash
 cd ~/fahrrad_projekt
 source meine_umgebung/bin/activate
 ```
 
-Run:
+Run training:
 
 ```bash
 python3 fahrrad_lernen.py
 ```
 
-After training finishes, confirm model files exist:
+Expected (similar):
+
+* `Found XX images belonging to 2 classes.`
+* It prints `Epoch 1/5 ...`
+* At the end: saved model file
+
+Check the files exist:
 
 ```bash
 ls -l mein_fahrrad_modell.h5 mein_fahrrad_modell.keras
@@ -269,7 +299,7 @@ ls -l mein_fahrrad_modell.h5 mein_fahrrad_modell.keras
 
 ---
 
-## 8) Optional: Install Drag & Drop support for GUI
+## 8) (Optional) Drag & Drop support for the GUI
 
 ```bash
 pip install --no-cache-dir tkinterdnd2
@@ -277,13 +307,18 @@ pip install --no-cache-dir tkinterdnd2
 
 ---
 
-## 9) Create the GUI test script: testen.py
+## 9) Create GUI test script: `testen.py`
+
+Create/edit:
 
 ```bash
 nano testen.py
 ```
 
-Paste this FULL code:
+Paste this full code. **Important:** it correctly handles the common case:
+`{'bicycle': 0, 'not_bicycle': 1}`
+So the model output is probability of class **1** (= not_bicycle), and bicycle probability is `1 - pred`.
+(This fixes the “not_bicycle image but it says BICYCLE” problem you showed.) 
 
 ```python
 import os
@@ -312,7 +347,11 @@ def predict_image(model, img_path: str):
     arr = keras_image.img_to_array(img) / 255.0
     arr = np.expand_dims(arr, axis=0)
 
-    pred = float(model.predict(arr, verbose=0)[0][0])  # probability for class "1"
+    # sigmoid output = probability for class "1"
+    pred = float(model.predict(arr, verbose=0)[0][0])
+
+    # usual folder mapping in your training:
+    # bicycle = 0, not_bicycle = 1
     prob_not_bicycle = pred
     prob_bicycle = 1.0 - pred
 
@@ -499,12 +538,14 @@ if __name__ == "__main__":
 
 Save & exit nano:
 
-* Press `CTRL + O` then `ENTER`
-* Press `CTRL + X`
+* `CTRL + O` → `ENTER`
+* `CTRL + X`
 
 ---
 
-## 10) Run the GUI classifier
+## 10) Run the GUI (the “picture window”)
+
+Run:
 
 ```bash
 cd ~/fahrrad_projekt
@@ -512,46 +553,37 @@ source meine_umgebung/bin/activate
 python3 testen.py
 ```
 
-Optional CLI run:
+---
 
-```bash
-python3 testen.py daten/test/bicycle/your_image.jpg
-```
+# Why did a NOT-bicycle image show “BICYCLE”?
+
+This can happen for 3 common reasons:
+
+1. **Wrong probability rule (most common)**
+
+* If training prints:
+
+  * `{'bicycle': 0, 'not_bicycle': 1}`
+* Then the model output is “probability of NOT BICYCLE”.
+* Old GUI scripts often used: `if pred > 0.5 => BICYCLE` (WRONG for that mapping)
+* The `testen.py` above fixes this by using:
+
+  * `bicycle = 1 - pred`
+  * `not_bicycle = pred`
+
+2. **Too few images / mixed images**
+
+* If you only have ~20–50 images per class, the model can guess badly.
+* Also if a “chair” image accidentally sits inside `bicycle/` folder, training learns wrong.
+
+3. **Images are not balanced**
+
+* If you have 40 bicycle images but only 5 not_bicycle images, the model often predicts the bigger class.
 
 ---
 
-## 11) GitHub (optional, recommended)
-
-Create .gitignore:
+If you want, send me (copy/paste) the output of this command and I’ll tell you if your folder labels are correct:
 
 ```bash
-nano .gitignore
-```
-
-Paste:
-
-```
-meine_umgebung/
-daten/
-__pycache__/
-*.pyc
-*.h5
-*.keras
-```
-
-Create requirements.txt:
-
-```bash
-pip freeze > requirements.txt
-```
-
-Initialize git and push:
-
-```bash
-git init
-git add fahrrad_lernen.py testen.py README.md requirements.txt .gitignore
-git commit -m "Bicycle detector for Raspberry Pi"
-```
-
-```
+python3 -c "from tensorflow.keras.preprocessing.image import ImageDataGenerator; gen=ImageDataGenerator().flow_from_directory('daten/train'); print(gen.class_indices)"
 ```
