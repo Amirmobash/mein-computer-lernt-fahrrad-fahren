@@ -1,0 +1,293 @@
+# Raspberry Pi 5 — Bicycle Detector (KOMPLETT von Anfang bis Ende, Deutsch)
+
+Dieses Projekt zeigt Kindern Schritt für Schritt, wie ein Raspberry Pi Bilder anschaut und entscheidet:
+
+* **BICYCLE** (Fahrrad)
+* **NOT BICYCLE** (kein Fahrrad)
+
+✅ **Wichtig:** Du musst keine Python-Dateien neu schreiben.
+Alles ist schon im Projektordner enthalten (inkl. `daten/` mit Beispielbildern).
+
+---
+
+## Was du von GitHub brauchst (EINFACH)
+
+Du lädst **eine Datei** herunter:
+
+* `fahrrad_projekt.7z`
+
+Dann entpackst du sie. Danach hast du einen Ordner:
+
+* `fahrrad_projekt/`
+
+Darin sind schon enthalten:
+
+* `fahrrad_lernen.py` (Training)
+* `testen.py` (GUI-App)
+* `daten/` (Bilder-Ordner)
+* (nach dem Training) `mein_fahrrad_modell.h5` (das „Gehirn“)
+
+---
+
+## 0) Terminal öffnen
+
+Öffne das Terminal. Du siehst etwa so etwas:
+
+```bash
+amir@Amir:~ $
+```
+
+(Optional) Wo bin ich?
+
+```bash
+pwd
+```
+
+---
+
+## 1) Projekt entpacken und Ordner öffnen
+
+Entpacke `fahrrad_projekt.7z` in deinen **Home-Ordner** (`/home/<name>/`).
+
+Dann im Terminal:
+
+```bash
+cd ~/fahrrad_projekt
+pwd
+```
+
+Du solltest sehen (ähnlich):
+
+```bash
+/home/amir/fahrrad_projekt
+```
+
+---
+
+## 2) System aktualisieren + Tools installieren
+
+```bash
+sudo apt update && sudo apt full-upgrade -y
+sudo apt install -y python3-pip python3-venv python3-tk p7zip-full
+```
+
+✅ Wenn keine roten ERROR-Zeilen kommen, ist alles gut.
+
+---
+
+## 3) Virtuelle Umgebung (venv) aktivieren
+
+Eine venv ist ein „sicherer Raum“ nur für dieses Projekt.
+
+```bash
+cd ~/fahrrad_projekt
+python3 -m venv meine_umgebung
+source meine_umgebung/bin/activate
+```
+
+✅ Jetzt beginnt dein Prompt mit:
+
+```bash
+(meine_umgebung)
+```
+
+Dann:
+
+```bash
+python -m pip install -U pip setuptools wheel
+```
+
+---
+
+## 4) Python-Pakete installieren (stabil für Raspberry Pi)
+
+Diese Versionen vermeiden typische Fehler (protobuf/flatbuffers Konflikte):
+
+```bash
+pip install --no-cache-dir "protobuf>=5.28.0,<6" "flatbuffers>=24.3.25,<25"
+pip install --no-cache-dir "tensorflow==2.20.0" "numpy" "pillow" "scipy"
+```
+
+Schnelltest:
+
+```bash
+python3 -c "import tensorflow as tf, flatbuffers, google.protobuf, scipy; print('TF:', tf.__version__); print('flatbuffers:', flatbuffers.__version__); print('protobuf:', google.protobuf.__version__); print('scipy:', scipy.__version__)"
+```
+
+✅ Es sollten Versionsnummern erscheinen, ohne Crash.
+
+---
+
+## 5) Bilder-Ordner checken (wichtig!)
+
+Die Struktur muss so aussehen:
+
+* `daten/train/bicycle/`
+* `daten/train/not_bicycle/`
+* `daten/test/bicycle/`
+* `daten/test/not_bicycle/`
+
+Prüfen:
+
+```bash
+cd ~/fahrrad_projekt
+ls -R daten
+```
+
+---
+
+## 6) Wo kommen die Bilder hin?
+
+### Fahrrad-Bilder (BICYCLE) kommen hierhin:
+
+* `daten/train/bicycle/`
+* `daten/test/bicycle/`
+
+### Nicht-Fahrrad Bilder (NOT BICYCLE) kommen hierhin:
+
+* `daten/train/not_bicycle/`
+* `daten/test/not_bicycle/`
+
+✅ Dateinamen sind egal (du darfst die Namen so lassen, wie du sie heruntergeladen hast).
+✅ Erlaubt sind nur: `.jpg`, `.jpeg`, `.png`
+
+### Wie viele Bilder habe ich?
+
+Jede Zahl sollte **größer als 0** sein:
+
+```bash
+ls daten/train/bicycle | wc -l
+ls daten/train/not_bicycle | wc -l
+ls daten/test/bicycle | wc -l
+ls daten/test/not_bicycle | wc -l
+```
+
+---
+
+## SUPER WICHTIG (für bessere Treffer)
+
+Wenn der Computer manchmal falsch liegt, ist das normal.
+
+👉 **Mehr Bilder = besseres Gehirn!**
+
+* Mehr Fahrradbilder (verschiedene Fahrräder, Winkel, Hintergründe)
+* Mehr „nicht Fahrrad“ (Stuhl, Auto, Pflanze, Tasche, Schuhe, Scooter, Helm …)
+
+**Tipp für Kinder:**
+
+> „Gib dem Computer mehr Trainingsbilder, dann wird er schlauer.“
+
+---
+
+## 7) Training starten (das Modell wird gebaut)
+
+Stelle sicher:
+
+* du bist im Projektordner
+* venv ist aktiv
+
+```bash
+cd ~/fahrrad_projekt
+source meine_umgebung/bin/activate
+python3 fahrrad_lernen.py
+```
+
+Du siehst:
+
+* `Found XX images belonging to 2 classes`
+* dann `Epoch 1/5`, `Epoch 2/5` …
+
+Am Ende wird gespeichert:
+
+* `mein_fahrrad_modell.h5`
+
+Prüfen:
+
+```bash
+ls -l mein_fahrrad_modell.h5
+```
+
+✅ Wenn die Datei da ist: Training geschafft.
+
+---
+
+## 8) GUI-App starten (Bilder testen)
+
+```bash
+cd ~/fahrrad_projekt
+source meine_umgebung/bin/activate
+python3 testen.py
+```
+
+Dann:
+
+* **Open Image** klicken
+  oder (optional) Drag & Drop benutzen
+
+---
+
+## 9) Optional: Drag & Drop aktivieren
+
+Wenn du Drag & Drop willst:
+
+```bash
+pip install --no-cache-dir tkinterdnd2
+```
+
+Dann nochmal:
+
+```bash
+python3 testen.py
+```
+
+---
+
+## 10) Optional: Start mit Datei (Terminal-Trick)
+
+```bash
+python3 testen.py daten/test/bicycle/DEIN_BILD.jpg
+```
+
+---
+
+## 11) Wenn er „NOT BICYCLE“ als „BICYCLE“ erkennt
+
+Das kann passieren, wenn:
+
+1. Zu wenige Bilder vorhanden sind
+2. „not_bicycle“ zu wenig Vielfalt hat
+3. Training/Test sind nicht gut gemischt
+
+### Fix (einfach):
+
+* Mehr Bilder sammeln (besonders NOT BICYCLE)
+* Neue Trainingsrunde starten:
+
+```bash
+python3 fahrrad_lernen.py
+```
+
+---
+
+## 12) Mini-Check: Klassen-Zuordnung (nur falls nötig)
+
+```bash
+python3 -c "from tensorflow.keras.preprocessing.image import ImageDataGenerator; gen=ImageDataGenerator().flow_from_directory('daten/train'); print(gen.class_indices)"
+```
+
+✅ Oft ist es so:
+
+```bash
+{'bicycle': 0, 'not_bicycle': 1}
+```
+
+---
+
+## 13) Fertig ✅
+
+Wenn du:
+
+* das Modell trainiert hast (`mein_fahrrad_modell.h5` existiert)
+* und `testen.py` startet
+
+… dann ist das Projekt komplett.
