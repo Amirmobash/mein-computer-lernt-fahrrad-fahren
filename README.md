@@ -1,4 +1,4 @@
-# 🚲 Mein Computer lernt Fahrrad fahren (Raspberry Pi 5)
+# 🚲 Mein Computer lernt von mir (Raspberry Pi 5)
 ## Kinder-README (Deutsch) — Befehle & Code sind Englisch ✅
 
 Hallo! In diesem Projekt lernt dein Raspberry Pi Bilder zu sortieren:
