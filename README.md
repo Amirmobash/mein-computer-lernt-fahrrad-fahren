@@ -1,193 +1,99 @@
-# 🚲 Mein Computer lernt von mir (Raspberry Pi 5)
-## Kinder-README (Deutsch) — Befehle & Code sind Englisch ✅
+# 🚲 Bicycle Classifier for Raspberry Pi 5  
+### Train a Computer Vision Model to Recognize Bicycles – No Cloud Needed
 
-Hallo! In diesem Projekt lernt dein Raspberry Pi Bilder zu sortieren:
+[![Watch the tutorial on YouTube](https://img.shields.io/badge/YouTube-Watch%20tutorial-red?logo=youtube)](https://youtu.be/eXKJaKfzpSQ?si=P_K_YV2heAU3mP6X)
+[![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-5-C51A4A?logo=raspberry-pi)](https://www.raspberrypi.com/products/raspberry-pi-5/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.20-FF6F00?logo=tensorflow)](https://www.tensorflow.org/)
 
-✅ **BICYCLE** (Fahrrad)  
-❌ **NOT BICYCLE** (kein Fahrrad)
-
-Du trainierst zuerst ein Modell (das ist wie ein kleines „Gehirn“)  
-und testest danach Bilder in einer App.
-
----
-
-# 0) 📥 Das Projekt herunterladen (große Datei)
-
-
-## 0.1 Download (super einfach)
-1) Öffne den Link im Browser  
-2) Klicke **Download**  
-3) Warte bis es fertig ist
-
-✅ Danach liegt die Datei meistens hier:
-`/home/pi/Downloads/`
-
-Die Datei heißt z.B.:
-`fahrrad_projekt.7z`
+> **Teach your Raspberry Pi 5 to sort images into `BICYCLE` 🚲 and `NOT BICYCLE` ❌**  
+> This project includes a full training pipeline + a GUI test app. Perfect for learning AI on edge devices.
 
 ---
 
-# 1) 📦 Entpacken (Extract)
+## 📺 Video Guide (German / English subtitles available)
 
-## Option A — File Manager (am leichtesten)
-1) Öffne **File Manager**
-2) Gehe zu **Downloads**
-3) Rechtsklick auf `fahrrad_projekt.7z`
-4) Klicke **Extract Here** oder **Extract to…**
+👉 **Click the badge above or use this link:**  
+[https://youtu.be/eXKJaKfzpSQ](https://youtu.be/eXKJaKfzpSQ?si=P_K_YV2heAU3mP6X)
 
-✅ Danach hast du einen Ordner:
-`fahrrad_projekt`
-
-## Option B — Terminal (wenn du lieber tippst)
-Öffne Terminal und tippe:
-
-```bash
-cd ~/Downloads
-sudo apt update
-sudo apt install -y p7zip-full
-7z x fahrrad_projekt.7z
-````
+The video walks you through every step – from downloading the dataset to training and testing your own model.
 
 ---
 
-# 2) 📁 Ordner in den Home-Ordner verschieben (wichtig!)
+## 🧠 What you will build
 
-Wir wollen den Projektordner hier haben:
-✅ `/home/pi/fahrrad_projekt`  (kurz: `~/fahrrad_projekt`)
-
-Wenn der Ordner noch in Downloads ist, verschiebe ihn so:
-
-```bash
-mv ~/Downloads/fahrrad_projekt ~/
-```
-
-Prüfen:
-
-```bash
-ls ~
-```
-
-✅ Du solltest `fahrrad_projekt` sehen.
+- A **neural network** (TensorFlow/Keras) that classifies images as bicycle or not.
+- A **graphical application** to test new images with drag & drop (optional).
+- A **fully offline AI** that runs entirely on your Raspberry Pi 5.
 
 ---
 
-# 3) 🟣 In den Projektordner gehen
+## 📦 Project Download (Large File – not on GitHub)
 
-```bash
-cd ~/fahrrad_projekt
-pwd
-```
+Because the dataset contains many images, the project archive is hosted on Dropbox:
 
-✅ Erwartet (ähnlich):
-`/home/pi/fahrrad_projekt`
+🔗 **[Download `fahrrad_projekt.7z` from Dropbox](https://www.dropbox.com/t/5BKLy684gWYmyOt7)**
+
+After downloading, place the file in `/home/pi/Downloads/` or use the commands below.
 
 ---
 
-# 4) 🛠️ System updaten + Tools installieren
+## 🛠️ Setup Instructions (Raspberry Pi OS – Bookworm)
+
+Open a terminal and follow these steps.
+
+### 1️⃣ Update system & install dependencies
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
-sudo apt install -y python3-pip python3-venv python3-tk
+sudo apt install -y python3-pip python3-venv python3-tk p7zip-full
 ```
 
-✅ Gut: keine roten **ERROR**-Zeilen.
-
----
-
-# 5) 🧪 Python-Umgebung (venv) erstellen & aktivieren
-
-Eine venv ist wie eine „Zauber-Box“ nur für dieses Projekt.
+### 2️⃣ Extract the project archive
 
 ```bash
+cd ~/Downloads
+7z x fahrrad_projekt.7z
+mv ~/Downloads/fahrrad_projekt ~/
 cd ~/fahrrad_projekt
+```
+
+### 3️⃣ Create a virtual environment (isolated Python)
+
+```bash
 python3 -m venv meine_umgebung
 source meine_umgebung/bin/activate
-```
-
-✅ Wenn alles richtig ist, siehst du vorne:
-`(meine_umgebung)`
-
-Dann:
-
-```bash
 python -m pip install -U pip setuptools wheel
 ```
 
----
-
-# 6) 📚 Pakete installieren (stabil für Raspberry Pi)
+### 4️⃣ Install required Python packages
 
 ```bash
 pip install --no-cache-dir "protobuf>=5.28.0,<6" "flatbuffers>=24.3.25,<25"
 pip install --no-cache-dir "tensorflow==2.20.0" "numpy" "pillow" "scipy"
 ```
 
-(Optional) Mini-Test:
+> ✅ Optional: Install `tkinterdnd2` for drag & drop support in the test app:
+> ```bash
+> pip install tkinterdnd2
+> ```
 
-```bash
-python3 -c "import tensorflow as tf; print('TF OK:', tf.__version__)"
-```
+### 5️⃣ Prepare your image dataset
 
----
+Place your own images into these folders:
 
-# 7) 🗂️ Bilder-Ordner prüfen (Dataset)
+| Category         | Training folder                         | Testing folder                        |
+|------------------|-----------------------------------------|---------------------------------------|
+| `BICYCLE` 🚲     | `daten/train/bicycle/`                  | `daten/test/bicycle/`                 |
+| `NOT BICYCLE` ❌ | `daten/train/not_bicycle/`              | `daten/test/not_bicycle/`             |
 
-Im Projekt gibt es diese Ordner:
+Supported formats: `.jpg`, `.jpeg`, `.png`
 
-* `daten/train/bicycle/`
-* `daten/train/not_bicycle/`
-* `daten/test/bicycle/`
-* `daten/test/not_bicycle/`
+> 💡 **Tip for better accuracy**  
+> - Add **many different images** (different angles, lighting, backgrounds).  
+> - For `NOT BICYCLE`, include chairs, cars, bags, helmets, scooters – anything that is **not** a bicycle.  
+> - The more diverse your training data, the smarter your model becomes.
 
-Prüfen:
-
-```bash
-cd ~/fahrrad_projekt
-ls -R daten
-```
-
----
-
-# 8) 🖼️ Bilder: Wo kommen sie hin?
-
-✅ **Fahrrad-Bilder** kommen hier rein:
-
-* `daten/train/bicycle/`
-* `daten/test/bicycle/`
-
-✅ **Nicht-Fahrrad-Bilder** (Stuhl, Auto, Pflanze, Tasche …) kommen hier rein:
-
-* `daten/train/not_bicycle/`
-* `daten/test/not_bicycle/`
-
-✅ Erlaubte Bildtypen:
-`.jpg` `.jpeg` `.png`
-
-✅ Dateinamen sind egal (du darfst die Download-Namen lassen).
-
-Ordner im File Manager öffnen:
-
-```bash
-xdg-open .
-```
-
----
-
-# ⭐ Super Tipp: Mehr Bilder = schlauerer Computer!
-
-Wenn dein Raspberry Pi manchmal falsch rät, ist das normal.
-
-✅ Für bessere Genauigkeit:
-
-* Sammle **mehr** Bilder
-* Sammle **verschiedene** Bilder (anderes Licht, andere Orte, andere Winkel)
-* Besonders bei **NOT BICYCLE** viele verschiedene Dinge (Stuhl, Auto, Schuhe, Helm, Scooter …)
-
-Je mehr er sieht, desto besser lernt er.
-
----
-
-# 9) 🧠 Training starten (Gehirn bauen)
+### 6️⃣ Train the model
 
 ```bash
 cd ~/fahrrad_projekt
@@ -195,54 +101,92 @@ source meine_umgebung/bin/activate
 python3 fahrrad_lernen.py
 ```
 
-✅ Am Ende entsteht die Modell-Datei:
-`mein_fahrrad_modell.h5`
+When training finishes, you will get a file:  
+**`mein_fahrrad_modell.h5`** (the trained “brain”).
 
-Prüfen:
-
-```bash
-ls -l mein_fahrrad_modell.h5
-```
-
----
-
-# 10) 🪟 Test-App starten (GUI)
+### 7️⃣ Run the test GUI
 
 ```bash
-cd ~/fahrrad_projekt
-source meine_umgebung/bin/activate
 python3 testen.py
 ```
 
-Dann:
-
-* **Open Image** klicken
-* Bild auswählen
-* Ergebnis ansehen: **BICYCLE** oder **NOT BICYCLE**
+Click **Open Image** → select a picture → see the prediction:  
+**BICYCLE** or **NOT BICYCLE**.
 
 ---
 
-# 11) 🧲 Optional: Drag & Drop aktivieren
+## 🔍 Troubleshooting & FAQs
 
+### ❌ Model misclassifies a non‑bicycle as a bicycle
+
+**Solutions:**  
+1. Add more **diverse** non‑bicycle images (different objects, scenes).  
+2. Verify that no bicycle images accidentally ended up in the `not_bicycle` folders.  
+3. Retrain the model after cleaning the dataset.
+
+### ❌ “ModuleNotFoundError: No module named 'tkinter'”
+
+Run:
 ```bash
-pip install --no-cache-dir tkinterdnd2
-python3 testen.py
+sudo apt install python3-tk
+```
+
+### ❌ Training is very slow
+
+- Make sure you are using a **Raspberry Pi 5** (older models are much slower).  
+- Reduce image sizes (the script already resizes to 150x150).  
+- Use fewer training epochs (edit `fahrrad_lernen.py` and lower `epochs`).
+
+### ❌ I get a memory error during training
+
+Close other applications and try adding `batch_size=16` in the `model.fit()` call inside the training script.
+
+---
+
+## 📁 Project structure after extraction
+
+```
+~/fahrrad_projekt/
+├── daten/
+│   ├── train/
+│   │   ├── bicycle/
+│   │   └── not_bicycle/
+│   └── test/
+│       ├── bicycle/
+│       └── not_bicycle/
+├── fahrrad_lernen.py          # training script
+├── testen.py                  # GUI testing app
+├── meine_umgebung/            # Python virtual environment
+└── mein_fahrrad_modell.h5     # generated after training
 ```
 
 ---
 
-# 12) Wenn es falsch erkennt (NOT BICYCLE → BICYCLE) Amir Mobasheraghdam
+## 🧪 Requirements (tested on)
 
-✅ Lösung:
-
-1. Mehr Bilder sammeln (besonders NOT BICYCLE Vielfalt)
-2. Prüfen, dass kein Fahrrad im `not_bicycle` Ordner ist
-3. Neu trainieren:
-
-```bash
-python3 fahrrad_lernen.py
-```
+- **Hardware:** Raspberry Pi 5 (4GB or 8GB)  
+- **OS:** Raspberry Pi OS Bookworm (64-bit)  
+- **Python:** 3.11+  
+- **TensorFlow:** 2.20.0 (optimized for ARM64)
 
 ---
 
-✅ Fertig! Viel Spaß 🚲🤖
+## 🙌 Credits & License
+
+- Project created by **Amir Mobasheraghdam** (see video description)  
+- Free to use for personal & educational purposes  
+- If you improve the model or dataset, feel free to share your results!
+
+---
+
+## 🔗 Links
+
+- [📺 Full video tutorial](https://youtu.be/eXKJaKfzpSQ?si=P_K_YV2heAU3mP6X)  
+- [💾 Project download (Dropbox)](https://www.dropbox.com/t/5BKLy684gWYmyOt7)  
+- [🐍 TensorFlow on Raspberry Pi](https://www.tensorflow.org/install/pip)
+
+---
+
+**Happy building! 🚲🤖**  
+*Your Raspberry Pi will soon be a bicycle‑spotting expert.*
+```
