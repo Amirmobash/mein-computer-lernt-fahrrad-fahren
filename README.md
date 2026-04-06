@@ -31,7 +31,7 @@ The video walks you through every step – from downloading the dataset to train
 
 Because the dataset contains many images, the project archive is hosted on Dropbox:
 
-🔗 **[Download `fahrrad_projekt.7z` from Dropbox](https://www.dropbox.com/t/5BKLy684gWYmyOt7)**
+🔗 **[Download `fahrrad_projekt.7z`](https://www.nivta.de/Downloads/index.html))**
 
 After downloading, place the file in `/home/pi/Downloads/` or use the commands below.
 
