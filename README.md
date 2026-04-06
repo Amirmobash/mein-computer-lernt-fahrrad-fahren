@@ -182,7 +182,7 @@ Close other applications and try adding `batch_size=16` in the `model.fit()` cal
 ## 🔗 Links
 
 - [📺 Full video tutorial](https://youtu.be/eXKJaKfzpSQ?si=P_K_YV2heAU3mP6X)  
-- [💾 Project download ]((https://www.nivta.de/Downloads/index.html))  
+- [💾 Project download ](https://www.nivta.de/Downloads/index.html)  
 - [🐍 TensorFlow on Raspberry Pi](https://www.tensorflow.org/install/pip)
 
 ---
