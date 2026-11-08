@@ -1,4 +1,10 @@
 # 🚲 Bicycle Classifier for Raspberry Pi 5  
+
+
+<p align="center"><img src="docs/images/raspberry-pi-5-bicycle-image-classification.svg" alt="Raspberry Pi 5 computer vision classifier of bicycle versus non-bicycle images" width="960" /></p>
+
+<sub>Conceptual illustration; not a verified hardware photograph or exact CAD export.</sub>
+
 ### Train a Computer Vision Model to Recognize Bicycles – No Cloud Needed
 
 [![Watch the tutorial on YouTube](https://img.shields.io/badge/YouTube-Watch%20tutorial-red?logo=youtube)](https://youtu.be/eXKJaKfzpSQ?si=P_K_YV2heAU3mP6X)
